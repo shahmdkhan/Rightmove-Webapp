@@ -307,9 +307,12 @@ def main(url):
         item['Floor Plan image url'] = floor_plan
         item.update(images)
 
+        data.append(item)
+
         pdf = make_pdf(item=item, response=selector)
 
-        return pdf
+        # return pdf
+        return pdf, data
     except Exception as e:
         print(f"Error processing URL {url}: {e}")
         return ''
