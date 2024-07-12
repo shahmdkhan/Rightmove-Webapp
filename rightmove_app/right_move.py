@@ -28,6 +28,9 @@ custom_style_title = ParagraphStyle('CustomStyleTitle', parent=styles['Heading1'
 custom_style_content = ParagraphStyle('CustomStyleContent', parent=styles['Normal'], fontSize=10, leading=12, spaceAfter=3, fontName='Helvetica')
 doc = None
 
+# Custom styles
+custom_style_title_center = ParagraphStyle('CustomStyleTitleCenter', parent=styles['Heading1'], fontSize=14, spaceAfter=0, alignment=TA_CENTER)
+
 
 # Function to get value by heading
 def get_value_by_heading(selector, heading, letting_details=False):
@@ -99,24 +102,6 @@ def create_images_table(item):
     ]))
 
     return image_table
-
-
-# def build_pdf_file(address):
-#     pdf_file = f'{pdf_folder_path}/{slugify(address)}.pdf'
-#
-#     # Find the highest existing counter for the address
-#     counter = 0
-#     while os.path.exists(pdf_file):
-#         counter += 1
-#         pdf_file = os.path.join(pdf_folder_path, f'{slugify(address)}({counter}).pdf')
-#
-#     doc = BaseDocTemplate(pdf_file, title='Properties', pagesize=letter, leftMargin=20, topMargin=15, rightMargin=6, bottomMargin=6)
-#
-#     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height - 50)
-#
-#     header_template = PageTemplate(frames=[frame], onPage=pdf_page_header)
-#
-#     doc.addPageTemplates(header_template)
 
 
 def pdf_page_header(canvas, doc):
@@ -193,7 +178,7 @@ def make_pdf(item, response):
 
     bed_room = item.get('Bedrooms').replace('×', '')
     bath_room = item.get('Bathrooms').replace('×', '')
-    price = item.get('Price PW')
+    price = item.get('Price PW', '')
     price_bed_bath_values = f'<font bgcolor="{HexColor("#A6F79B ")}">{price} </font> | {bed_room} Bedroom | {bath_room} Bathroom'
     address = item.get('Address', '')
 
@@ -217,8 +202,10 @@ def make_pdf(item, response):
     doc.addPageTemplates(header_template)
 
     content = [
-        Paragraph(f'<br/><br/>{address.title()}', custom_style_title),
-        Paragraph(f'{price_bed_bath_values}<br/>', custom_style_title),
+        # Paragraph(f'<br/><br/>{address.title()}', custom_style_title),
+        # Paragraph(f'{price_bed_bath_values}<br/>', custom_style_title),
+        Paragraph(f'<br/><br/>{address.title()}', custom_style_title_center),  # Center-align title
+        Paragraph(f'{price_bed_bath_values}<br/>', custom_style_title_center),  # Center-align price and details
         Paragraph(f'<br/>', custom_style_content),
         create_images_table(item),
         Paragraph(f'<br/>', custom_style_content),
@@ -232,7 +219,9 @@ def make_pdf(item, response):
         content.append(add_floor_plan_image(item))
         content.append(PageBreak())
 
+    # previous
     # property_id = ''.join(response.url.split('/')[-1:])
+
     property_id = re.search(r'/properties/(\d+)', response.response.url)
     property_id = property_id.group(1) if property_id else ''
     content.append(Paragraph(f'<br/>{property_id}', custom_style_content))
@@ -311,7 +300,6 @@ def main(url):
 
         pdf = make_pdf(item=item, response=selector)
 
-        # return pdf
         return pdf, data
     except Exception as e:
         print(f"Error processing URL {url}: {e}")
