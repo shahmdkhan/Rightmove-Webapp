@@ -28,7 +28,7 @@ custom_style_title = ParagraphStyle('CustomStyleTitle', parent=styles['Heading1'
 custom_style_content = ParagraphStyle('CustomStyleContent', parent=styles['Normal'], fontSize=10, leading=12, spaceAfter=3, fontName='Helvetica')
 doc = None
 
-# Custom styles
+# Custom styles Header & Title in Center
 custom_style_title_center = ParagraphStyle('CustomStyleTitleCenter', parent=styles['Heading1'], fontSize=14, spaceAfter=0, alignment=TA_CENTER)
 
 
@@ -111,7 +111,9 @@ def pdf_page_header(canvas, doc):
         logo_x = doc.leftMargin
         logo_y = doc.height + doc.topMargin - logo_height
 
+        # previous
         # canvas.drawImage("input/logo.PNG", logo_x, logo_y, width=logo_width, height=logo_height)
+
         # Correct path to the logo image
         logo_path = os.path.join('rightmove_app', 'assets', 'input', 'logo.PNG')
 
@@ -279,7 +281,6 @@ def main(url):
             print(f'URL {url} returned 410 status code')
             return data
 
-        # selector = Selector(response.text)
         selector = Selector(response)
         try:
             json_data = json.loads(
@@ -302,12 +303,27 @@ def main(url):
         item['Furnish Type'] = get_value_by_heading(selector, 'Furnish type:', letting_details=True)
         item['image_urls'] = images_urls
         item['Floor Plan image url'] = floor_plan
-        item.update(images)
 
-        data.append(item)
+        item.update(images)
 
         pdf = make_pdf(item=item, response=selector)
         file_name = slugify(address)
+
+        # Remove 'image_urls' and 'Floor Plan image url' from item
+        del item['image_urls']
+        del item['Floor Plan image url']
+
+        # Remove keys added by images update
+        for key in images.keys():
+            del item[key]
+
+        # Add individual images and floor plan to item
+        for i in range(1, 11):
+            item[f'Image {i}'] = images.get(f'Image {i}', '')
+        item['Floor Plan'] = images.get('Floor Plan', '')
+
+        data.append(item)
+
         return pdf, data, file_name
     except Exception as e:
         print(f"Error processing URL {url}: {e}")
