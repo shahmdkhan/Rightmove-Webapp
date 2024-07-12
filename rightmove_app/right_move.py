@@ -202,8 +202,10 @@ def make_pdf(item, response):
     doc.addPageTemplates(header_template)
 
     content = [
+        # previous
         # Paragraph(f'<br/><br/>{address.title()}', custom_style_title),
         # Paragraph(f'{price_bed_bath_values}<br/>', custom_style_title),
+
         Paragraph(f'<br/><br/>{address.title()}', custom_style_title_center),  # Center-align title
         Paragraph(f'{price_bed_bath_values}<br/>', custom_style_title_center),  # Center-align price and details
         Paragraph(f'<br/>', custom_style_content),
@@ -224,7 +226,12 @@ def make_pdf(item, response):
 
     property_id = re.search(r'/properties/(\d+)', response.response.url)
     property_id = property_id.group(1) if property_id else ''
-    content.append(Paragraph(f'<br/>{property_id}', custom_style_content))
+    property_id_custom_style_content = ParagraphStyle(
+        'CustomStyleContent', parent=styles['Normal'], fontSize=10, textColor='black',
+        spaceBefore=10, alignment=2, leading=10, rightIndent=40
+    )
+
+    content.append(Paragraph(f'<br/>{property_id}', property_id_custom_style_content))
 
     if letting_details:
         content.append(Paragraph(f'<br/><u>Letting Details</u>:', custom_style_title))
