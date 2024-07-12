@@ -54,7 +54,7 @@ class HomePageView(TemplateView):
                     zipf.writestr(f'{file_name}.xlsx', excel_buffer.getvalue())
 
                 zip_filename = f"{file_name}_{current_time}.zip"
-                
+
                 # Create response for the zip file
                 zip_response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
                 zip_response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
