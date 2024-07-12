@@ -291,7 +291,8 @@ def main(url):
         images, images_urls, floor_plan = get_images(selector)
 
         item = OrderedDict()
-        item['Address'] = selector.css('[itemprop="streetAddress"]::text').get(default='').strip()
+        address = selector.css('[itemprop="streetAddress"]::text').get(default='').strip()
+        item['Address'] = address
         item['Price PCM'] = selector.css('article div span:contains(" pcm")::text').get(default='').replace('pcm', '').strip()
         item['Price PW'] = selector.css('article div:contains("pw")::text').get(default='').replace('pw', '').strip()
         item['Property Type'] = get_value_by_heading(selector, 'PROPERTY TYPE') or json_data.get('propertySubType', '')
@@ -306,8 +307,8 @@ def main(url):
         data.append(item)
 
         pdf = make_pdf(item=item, response=selector)
-
-        return pdf, data
+        file_name = slugify(address)
+        return pdf, data, file_name
     except Exception as e:
         print(f"Error processing URL {url}: {e}")
         return ''
