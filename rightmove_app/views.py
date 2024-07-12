@@ -6,8 +6,8 @@ from .right_move import main
 from datetime import datetime
 
 from django.shortcuts import render
-from django.http import HttpResponse, FileResponse
 from django.views.generic import TemplateView
+from django.http import HttpResponse, FileResponse
 
 
 class HomePageView(TemplateView):
@@ -29,18 +29,14 @@ class HomePageView(TemplateView):
 
             try:
                 # Call main function to scrape data
-                pdf_content, data = main(url)
+                pdf_content, data, file_name = main(url)
 
                 if not pdf_content:
                     return render(request, 'home.html', {'error_message': f'Failed to process URL: {url}'})
 
-                # Generate filenames with current time
-                pdf_filename = f"property_data_{current_time}.pdf"
-                excel_filename = f"property_data_{current_time}.xlsx"
-
                 # Create PDF file response
                 pdf_response = HttpResponse(pdf_content, content_type='application/pdf')
-                pdf_response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+                pdf_response['Content-Disposition'] = f'attachment; filename="{file_name}.pdf"'
 
                 # Generate Excel file from data
                 df = pd.DataFrame(data)
@@ -49,15 +45,16 @@ class HomePageView(TemplateView):
 
                 # Create Excel file response
                 excel_response = HttpResponse(excel_buffer.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                excel_response['Content-Disposition'] = f'attachment; filename="{excel_filename}"'
+                excel_response['Content-Disposition'] = f'attachment; filename="{file_name}.xlsx"'
 
                 # Zip both files
                 zip_buffer = io.BytesIO()
                 with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                    zipf.writestr(pdf_filename, pdf_content)
-                    zipf.writestr(excel_filename, excel_buffer.getvalue())
+                    zipf.writestr(f'{file_name}.pdf', pdf_content)
+                    zipf.writestr(f'{file_name}.xlsx', excel_buffer.getvalue())
 
-                zip_filename = f"property_data_{current_time}.zip"
+                zip_filename = f"{file_name}_{current_time}.zip"
+                
                 # Create response for the zip file
                 zip_response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
                 zip_response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
