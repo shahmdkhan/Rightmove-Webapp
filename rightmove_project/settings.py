@@ -121,12 +121,18 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "rightmove_app\static"), ]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# MEDIA_URL = '/media/'
-# DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'rightmove_app\media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'rightmove_app', 'media')
+
+# Check if MEDIA_ROOT exists, create it if it doesn't
+if not os.path.exists(MEDIA_ROOT):
+    os.makedirs(MEDIA_ROOT)
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
 
