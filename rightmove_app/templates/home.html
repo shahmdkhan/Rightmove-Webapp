@@ -70,7 +70,8 @@
 
             var urlInput = document.getElementById('urlInput');
             var runScriptButton = document.getElementById('runScript');
-            var validUrlPattern = /rightmove/;
+            //var validUrlPattern = /rightmove/;
+            var validUrlPattern = /rightmove\.co\.uk\/properties\/\d+/;
             var errorMessage = document.getElementById('errorMessage');
             var processingComplete = {{ processing_complete|default:"false"|lower }}; // Capture processing_complete flag from Django view
 
