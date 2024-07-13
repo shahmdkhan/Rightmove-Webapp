@@ -272,26 +272,22 @@ def main(url):
         'sec-ch-ua-platform': '"Windows"',
     }
     data = []
-    error = ''
 
     try:
         print('Requested URL:', url)
         response = requests.get(url, headers=headers)
 
         if response.status_code == 410:
-            error = f'URL {url} returned 410 status code \n\n'
-            print(error)
-            return '', [], '', error
+            print(f'URL {url} returned 410 status code')
+            return data
 
         selector = Selector(response)
         try:
             json_data = json.loads(
                 selector.css('script:contains("propertyData")::text').re_first(r'window.PAGE_MODEL = (.*)')).get(
                 'propertyData', {})
-        except Exception as e:
+        except:
             json_data = {}
-            error = f'Error parsing JSON data for URL {url}: {e} \n\n'
-            print(error)
 
         images, images_urls, floor_plan = get_images(selector)
 
@@ -328,9 +324,7 @@ def main(url):
 
         data.append(item)
 
-        print(f'PDf File : {file_name} created against : {url}')
-        return pdf, data, file_name, error
+        return pdf, data, file_name
     except Exception as e:
-        error = f"Error processing URL {url}: {e} \n\n"
-        print('Error :', error)
-        return '', [], '', error
+        print(f"Error processing URL {url}: {e}")
+        return ''
