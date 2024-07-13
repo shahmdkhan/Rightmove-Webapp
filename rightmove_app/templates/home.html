@@ -55,6 +55,10 @@
     </form>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            var runScriptButton = document.getElementById('runScript');
+            // Reset button state after file download
+            runScriptButton.textContent = 'Run Script'; // Restore original button text
+
             document.getElementById('downloadForm').submit();
         });
     </script>
@@ -68,30 +72,42 @@
             var runScriptButton = document.getElementById('runScript');
             var validUrlPattern = /rightmove/;
             var errorMessage = document.getElementById('errorMessage');
+            var processingComplete = {{ processing_complete|default:"false"|lower }}; // Capture processing_complete flag from Django view
 
+            // Event listener for input in the URL textarea
             urlInput.addEventListener('input', function() {
                 var urls = urlInput.value.split('\n').map(url => url.trim());
                 var atLeastOneValid = urls.some(url => validUrlPattern.test(url));
 
+                // Enable or disable the Run Script button based on valid URLs
                 if (atLeastOneValid) {
                     urlInput.classList.remove('is-invalid');
                     urlInput.classList.add('is-valid');
                     runScriptButton.disabled = false;
-
+                    runScriptButton.textContent = 'Run Script';
+                    // Remove error message if present
                     if (errorMessage) {
                         errorMessage.remove();
                     }
                 } else {
                     urlInput.classList.remove('is-valid');
                     urlInput.classList.add('is-invalid');
+                    runScriptButton.textContent = 'Run Script';
                     runScriptButton.disabled = true;
                 }
             });
 
+            // Check if processing is complete and adjust button text
+            if (processingComplete) {
+                runScriptButton.textContent = 'Run Script';
+            }
+
+            // Event listener for form submission (Run Script button)
             document.getElementById('processForm').addEventListener('submit', function(event) {
                 var urls = urlInput.value.split('\n').map(url => url.trim());
                 var atLeastOneValid = urls.some(url => validUrlPattern.test(url));
 
+                // Prevent form submission if no valid URLs are entered
                 if (!atLeastOneValid) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -99,9 +115,17 @@
                 } else {
                     urlInput.classList.remove('is-invalid');
                     runScriptButton.disabled = true;
-                    runScriptButton.textContent = 'Processing...';
+                    runScriptButton.textContent = 'Processing...'; // Change button text to indicate processing
                 }
             });
+
+            // Event listener for download form submission
+            if (document.getElementById('downloadForm')) {
+                document.getElementById('downloadForm').addEventListener('submit', function() {
+                    // Reset button state after file download
+                    runScriptButton.textContent = 'Run Script'; // Restore original button text
+                });
+            }
         });
     </script>
 </body>
