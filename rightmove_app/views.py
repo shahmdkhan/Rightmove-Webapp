@@ -37,6 +37,8 @@ class HomePageView(TemplateView):
         if request.method == 'POST':
             # Get the URLs from the form submission
             urls = request.POST.get('urlInput', '').splitlines()
+            # Remove empty strings and duplicates
+            urls = list(set(filter(None, urls)))
 
             errors = []
             all_data = []
