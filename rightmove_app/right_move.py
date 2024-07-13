@@ -283,6 +283,11 @@ def main(url):
             print(error)
             return '', [], '', error
 
+        if response.status_code != 200:
+            error = f'Error {response.status_code} occurred while fetching URL: {url} \n\n'
+            print(error)
+            return '', [], '', error
+
         selector = Selector(response)
         try:
             json_data = json.loads(
