@@ -27,7 +27,7 @@ class HomePageView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         """Handles get requests to '/'"""
-        return render(request, 'home.html')
+        return render(request, self.template_name)
 
     def post(self, request, *args, **kwargs):
         """Handles POST requests to '/'"""
@@ -38,9 +38,9 @@ class HomePageView(TemplateView):
             # Get the URLs from the form submission
             urls = request.POST.get('urlInput', '').splitlines()
 
+            errors = []
             all_data = []
             zip_buffer = io.BytesIO()
-            errors = []
 
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for url in urls:
@@ -85,7 +85,7 @@ class HomePageView(TemplateView):
             if not os.path.exists(settings.MEDIA_ROOT):
                 os.makedirs(settings.MEDIA_ROOT)
 
-            # Remove any existing files in the MEDIA_ROOT {Media Folder} directory
+            # Remove any existing files in the MEDIA_ROOT directory
             for filename in os.listdir(settings.MEDIA_ROOT):
                 file_path = os.path.join(settings.MEDIA_ROOT, filename)
                 try:
@@ -103,16 +103,20 @@ class HomePageView(TemplateView):
 
             # If there are errors, but no PDF or Excel file generated, return only errors
             if errors and not all_data:
-                return render(request, 'home.html', {
+                return render(request, self.template_name, {
                     'error_message': ' | '.join(errors),
+                    'processing_complete': True  # Flag to indicate processing is complete
                 })
 
             # If there are errors and files generated, return errors with the download link
             if errors:
-                return render(request, 'home.html', {
+                return render(request, self.template_name, {
                     'error_message': ' | '.join(errors),
-                    'download_url': f"{settings.MEDIA_URL}{zip_filename}"
+                    'download_url': f"{settings.MEDIA_URL}{zip_filename}",
+                    'processing_complete': True  # Flag to indicate processing is complete
                 })
 
-            # Return the file response
+            # Return the file response for download
             return FileResponse(open(zip_path, 'rb'), as_attachment=True, filename=zip_filename)
+
+        return render(request, self.template_name)
