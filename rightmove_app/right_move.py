@@ -37,7 +37,7 @@ def get_value_by_heading(selector, heading, letting_details=False):
     if letting_details:
         return selector.css(f'dt:contains("{heading}") + dd::text').get(default='').strip()
     else:
-        return selector.css(f'dl:contains("{heading}") dd::text').get(default='').strip()
+        return response.css(f'dt:contains("{heading}") + dd p ::text').get('').strip().replace('Ã—', '') or selector.css(f'dl:contains("{heading}") dd::text').get(default='').strip()
 
 
 # Function to get images from the response
@@ -53,6 +53,9 @@ def get_images(selector):
         floor_plan_image = None
         property_images = []
     except AttributeError:
+        floor_plan_image = None
+        property_images = []
+    except TypeError:
         floor_plan_image = None
         property_images = []
     except IndexError:
