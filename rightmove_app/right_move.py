@@ -298,8 +298,8 @@ def main(url):
                 'propertyData', {})
         except Exception as e:
             json_data = {}
-            error = f'Error parsing JSON data for URL {url}: {e} \n\n'
-            print(error)
+            # error = f'Error parsing JSON data for URL {url}: {e} \n\n'
+            # print(error)
 
         images, images_urls, floor_plan = get_images(selector)
 
