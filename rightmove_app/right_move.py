@@ -25,11 +25,13 @@ from slugify import slugify
 
 styles = getSampleStyleSheet()
 custom_style_title = ParagraphStyle('CustomStyleTitle', parent=styles['Heading1'], fontSize=14, spaceAfter=0)
-custom_style_content = ParagraphStyle('CustomStyleContent', parent=styles['Normal'], fontSize=10, leading=12, spaceAfter=3, fontName='Helvetica')
+custom_style_content = ParagraphStyle('CustomStyleContent', parent=styles['Normal'], fontSize=10, leading=12,
+                                      spaceAfter=3, fontName='Helvetica')
 doc = None
 
 # Custom styles Header & Title in Center
-custom_style_title_center = ParagraphStyle('CustomStyleTitleCenter', parent=styles['Heading1'], fontSize=14, spaceAfter=0, alignment=TA_CENTER)
+custom_style_title_center = ParagraphStyle('CustomStyleTitleCenter', parent=styles['Heading1'], fontSize=14,
+                                           spaceAfter=0, alignment=TA_CENTER)
 
 
 # Function to get value by heading
@@ -37,29 +39,32 @@ def get_value_by_heading(selector, heading, letting_details=False):
     if letting_details:
         return selector.css(f'dt:contains("{heading}") + dd::text').get(default='').strip()
     else:
-        return selector.css(f'dt:contains("{heading}") + dd p ::text').get('').strip().replace('Ã—', '') or selector.css(f'dl:contains("{heading}") dd::text').get(default='').strip()
+        return selector.css(f'dt:contains("{heading}") + dd p ::text').get('').strip().replace('Ã—',
+                                                                                               '') or selector.css(
+            f'dl:contains("{heading}") dd::text').get(default='').strip()
+
+
+def get_page_json(response):
+    """
+    - This JSON contains property text data values as well but most important it has the extra images
+    - We are getting only the json before the "feesApply" key because this field has some text which is not loads in JSON
+    """
+
+    try:
+        json_data = json.loads('{' + response.css('script:contains("propertyData")::text').re_first(
+            r'("propertyData".*?)(,"feesApply")') + '}}')
+
+        return json_data.get('propertyData', {})
+    except:
+        return {}
 
 
 # Function to get images from the response
 def get_images(selector):
-    property_images = []
-    try:
-        json_data = json.loads(
-            selector.css('script:contains("propertyData")::text').re_first(r'window.PAGE_MODEL = (.*)'))
-        property_json = json_data.get('propertyData', {}) or {}
-        property_images = [image.get('url') for image in property_json.get('images', [{}])]
-        floor_plan_image = property_json.get('floorplans', [{}])[0].get('url') or None
-    except json.JSONDecodeError:
-        floor_plan_image = None
-        property_images = []
-    except AttributeError:
-        floor_plan_image = None
-        property_images = []
-    except TypeError:
-        floor_plan_image = None
-        property_images = []
-    except IndexError:
-        floor_plan_image = None
+    property_json = self.get_page_json(response)
+
+    property_images = [image.get('url') for image in property_json.get('images', [{}])] if property_json else []
+    floor_plan_image = property_json.get('floorplans', [{}])[0].get('url') if property_json else ''
 
     floor_plan = floor_plan_image or selector.css('a[href*="plan"] img::attr(src)').get('').replace('_max_296x197',
                                                                                                     '')
@@ -257,7 +262,6 @@ def make_pdf(item, response):
 
 # Main function to scrape data
 def main(url):
-
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'en-PK,en;q=0.9,ur-PK;q=0.8,ur;q=0.7,en-US;q=0.6',
@@ -292,21 +296,15 @@ def main(url):
             return '', [], '', error
 
         selector = Selector(response)
-        try:
-            json_data = json.loads(
-                selector.css('script:contains("propertyData")::text').re_first(r'window.PAGE_MODEL = (.*)')).get(
-                'propertyData', {})
-        except Exception as e:
-            json_data = {}
-            # error = f'Error parsing JSON data for URL {url}: {e} \n\n'
-            # print(error)
+        json_data = self.get_page_json(response)
 
         images, images_urls, floor_plan = get_images(selector)
 
         item = OrderedDict()
         address = selector.css('[itemprop="streetAddress"]::text').get(default='').strip()
         item['Address'] = address
-        item['Price PCM'] = selector.css('article div span:contains(" pcm")::text').get(default='').replace('pcm', '').strip()
+        item['Price PCM'] = selector.css('article div span:contains(" pcm")::text').get(default='').replace('pcm',
+                                                                                                            '').strip()
         item['Price PW'] = selector.css('article div:contains("pw")::text').get(default='').replace('pw', '').strip()
         item['Property Type'] = get_value_by_heading(selector, 'PROPERTY TYPE') or json_data.get('propertySubType', '')
         item['Bedrooms'] = get_value_by_heading(selector, 'BEDROOMS') or str(json_data.get('bedrooms', ''))
