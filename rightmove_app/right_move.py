@@ -44,14 +44,14 @@ def get_value_by_heading(selector, heading, letting_details=False):
             f'dl:contains("{heading}") dd::text').get(default='').strip()
 
 
-def get_page_json(response):
+def get_page_json(page_response):
     """
     - This JSON contains property text data values as well but most important it has the extra images
     - We are getting only the json before the "feesApply" key because this field has some text which is not loads in JSON
     """
 
     try:
-        json_data = json.loads('{' + response.css('script:contains("propertyData")::text').re_first(
+        json_data = json.loads('{' + page_response.css('script:contains("propertyData")::text').re_first(
             r'("propertyData".*?)(,"feesApply")') + '}}')
 
         return json_data.get('propertyData', {})
@@ -61,7 +61,7 @@ def get_page_json(response):
 
 # Function to get images from the response
 def get_images(selector):
-    property_json = get_page_json(response)
+    property_json = get_page_json(selector)
 
     property_images = [image.get('url') for image in property_json.get('images', [{}])] if property_json else []
     floor_plan_image = property_json.get('floorplans', [{}])[0].get('url') if property_json else ''
