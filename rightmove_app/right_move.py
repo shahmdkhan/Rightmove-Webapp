@@ -61,7 +61,7 @@ def get_page_json(response):
 
 # Function to get images from the response
 def get_images(selector):
-    property_json = self.get_page_json(response)
+    property_json = get_page_json(response)
 
     property_images = [image.get('url') for image in property_json.get('images', [{}])] if property_json else []
     floor_plan_image = property_json.get('floorplans', [{}])[0].get('url') if property_json else ''
@@ -296,7 +296,7 @@ def main(url):
             return '', [], '', error
 
         selector = Selector(response)
-        json_data = self.get_page_json(response)
+        json_data = get_page_json(selector)
 
         images, images_urls, floor_plan = get_images(selector)
 
