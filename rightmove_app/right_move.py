@@ -60,11 +60,24 @@ def get_page_json(page_response):
 
 
 # Function to get images from the response
+
 def get_images(selector):
     property_json = get_page_json(selector)
 
-    property_images = [image.get('url') for image in property_json.get('images', [{}])] if property_json else []
-    floor_plan_image = property_json.get('floorplans', [{}])[0].get('url') if property_json else ''
+    images = property_json.get('images', [{}]) or [{}]
+    floor_plans = property_json.get('floorplans', [{}]) or {}
+
+    property_images = [image.get('url') for image in images] if images and isinstance(images, list) else []
+
+    try:
+        if isinstance(floor_plans, list):
+            floor_plan_image = floor_plans[0].get('url', '')
+        elif isinstance(floor_plans, dict):
+            floor_plan_image = floor_plans.get('url', '')
+        else:
+            floor_plan_image = ''
+    except:
+        floor_plan_image = ''
 
     floor_plan = floor_plan_image or selector.css('a[href*="plan"] img::attr(src)').get('').replace('_max_296x197',
                                                                                                     '')
