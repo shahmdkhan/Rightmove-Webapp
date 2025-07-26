@@ -64,14 +64,14 @@ class HomePageView(TemplateView):
                             errors.append(f'Failed to process URL: {url}')
                             continue  # Continue to the next URL
 
-                        """
-                        - Check if there is Same PDF filename exists already, then name the other pdf with a counter 
-                        - (Sometimes there are different properties but under same addresses and same building)
-                        """
-
-                        counter = 0
+                        file_name = f'{file_name}.pdf'
                         if file_name in pdf_filenames:
-                            file_name = f'{file_name}.pdf'
+                            """
+                            - Check if there is Same PDF filename exists already, then name the other pdf with a counter 
+                            - (Sometimes there are different properties but under same addresses and same building)
+                            """
+
+                            counter = 0
 
                             while True:
                                 counter += 1
