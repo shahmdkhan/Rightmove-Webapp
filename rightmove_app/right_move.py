@@ -303,7 +303,7 @@ def main(url):
         #     print(error)
         #     return '', [], '', error
 
-        if response.status_code != 200 or response.status_code != 410:  # Allowing 410 as it returns Data
+        if response.status_code != 200 and response.status_code != 410:  # Allowing 410 as it returns Data
             error = f'Error {response.status_code} occurred while fetching URL: {url} \n\n'
             print(error)
             return '', [], '', error
