@@ -45,6 +45,8 @@ class HomePageView(TemplateView):
             zip_buffer = io.BytesIO()
 
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                pdf_filenames = []
+
                 for url in urls:
                     url = url.strip()
                     if not url:
@@ -61,6 +63,26 @@ class HomePageView(TemplateView):
                         if not pdf_content:
                             errors.append(f'Failed to process URL: {url}')
                             continue  # Continue to the next URL
+
+                        """
+                        - Check if there is Same PDF filename exists already, then name the other pdf with a counter 
+                        - (Sometimes there are different properties but under same addresses and same building)
+                        """
+
+                        counter = 0
+                        if file_name in pdf_filenames:
+                            while True:
+                                counter += 1
+
+                                if f'({counter}).pdf' in file_name:
+                                    continue
+
+                                # If there is already a counter added file exists, then we will replace the new filename with the extended counter
+                                if f'({counter-1}).pdf' in file_name:
+                                    file_name = file_name.replace(f'({counter-1}).pdf', f'({counter}).pdf')
+                                else:
+                                    file_name = file_name.replace('.pdf', f'({counter}).pdf')
+                                break
 
                         # Write PDF file to the zip
                         zipf.writestr(f'{file_name}.pdf', pdf_content)
