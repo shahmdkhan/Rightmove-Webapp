@@ -64,7 +64,7 @@ class HomePageView(TemplateView):
                             continue  # Continue to the next URL
 
                         file_name = f'{file_name}.pdf'
-                        counter = 0
+                        counter = 1
                         while file_name in pdf_filenames:
                             """
                             - Check if there is Same PDF filename exists already, then name the other pdf with a counter 
@@ -82,7 +82,6 @@ class HomePageView(TemplateView):
                             else:
                                 file_name = file_name.replace('.pdf', f'({counter}).pdf')
 
-                        print(f'Filename: {file_name}\n')
                         pdf_filenames.append(file_name)
 
                         # Write PDF file to the zip
