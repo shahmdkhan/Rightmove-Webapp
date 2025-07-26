@@ -71,6 +71,8 @@ class HomePageView(TemplateView):
 
                         counter = 0
                         if file_name in pdf_filenames:
+                            file_name = f'{file_name}.pdf'
+
                             while True:
                                 counter += 1
 
@@ -84,8 +86,10 @@ class HomePageView(TemplateView):
                                     file_name = file_name.replace('.pdf', f'({counter}).pdf')
                                 break
 
+                            pdf_filenames.append(file_name)
+
                         # Write PDF file to the zip
-                        zipf.writestr(f'{file_name}.pdf', pdf_content)
+                        zipf.writestr(file_name, pdf_content)
 
                         # Append data for Excel file
                         all_data.extend(data)
