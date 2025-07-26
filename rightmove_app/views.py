@@ -75,7 +75,9 @@ class HomePageView(TemplateView):
                             while True:
                                 counter += 1
 
-                                if f'({counter}).pdf' in file_name:
+                                file_name = file_name.replace('.pdf', f'({counter}).pdf')
+
+                                if file_name in pdf_filenames:
                                     continue
 
                                 # If there is already a counter added file exists, then we will replace the new filename with the extended counter
@@ -83,8 +85,10 @@ class HomePageView(TemplateView):
                                     file_name = file_name.replace(f'({counter-1}).pdf', f'({counter}).pdf')
                                 else:
                                     file_name = file_name.replace('.pdf', f'({counter}).pdf')
+
                                 break
 
+                        print(f'Filename: {file_name}\n')
                         pdf_filenames.append(file_name)
 
                         # Write PDF file to the zip

@@ -320,8 +320,8 @@ def main(url):
                                                                                                             '').strip()
         item['Price PW'] = selector.css('article div:contains("pw")::text').get(default='').replace('pw', '').strip()
         item['Property Type'] = get_value_by_heading(selector, 'PROPERTY TYPE') or json_data.get('propertySubType', '')
-        item['Bedrooms'] = get_value_by_heading(selector, 'BEDROOMS') or str(json_data.get('bedrooms', ''))
-        item['Bathrooms'] = get_value_by_heading(selector, 'BATHROOMS') or str(json_data.get('bathrooms', ''))
+        item['Bedrooms'] = get_value_by_heading(selector, 'BEDROOMS') or str(json_data.get('bedrooms', '')) or 0
+        item['Bathrooms'] = get_value_by_heading(selector, 'BATHROOMS') or str(json_data.get('bathrooms', '')) or 0
         item['Available Date'] = get_value_by_heading(selector, 'Let available date:', letting_details=True)
         item['Furnish Type'] = get_value_by_heading(selector, 'Furnish type:', letting_details=True)
         item['image_urls'] = images_urls
