@@ -64,29 +64,23 @@ class HomePageView(TemplateView):
                             continue  # Continue to the next URL
 
                         file_name = f'{file_name}.pdf'
-                        if file_name in pdf_filenames:
+                        counter = 0
+                        while file_name in pdf_filenames:
                             """
                             - Check if there is Same PDF filename exists already, then name the other pdf with a counter 
                             - (Sometimes there are different properties but under same addresses and same building)
                             """
 
-                            counter = 0
+                            counter += 1
 
-                            while True:
-                                counter += 1
+                            if f'({counter}).pdf' in file_name:
+                                continue
 
+                            # If there is already a counter added file exists, then we will replace the new filename with the extended counter
+                            if f'({counter-1}).pdf' in file_name:
+                                file_name = file_name.replace(f'({counter-1}).pdf', f'({counter}).pdf')
+                            else:
                                 file_name = file_name.replace('.pdf', f'({counter}).pdf')
-
-                                if file_name in pdf_filenames:
-                                    continue
-
-                                # If there is already a counter added file exists, then we will replace the new filename with the extended counter
-                                if f'({counter-1}).pdf' in file_name:
-                                    file_name = file_name.replace(f'({counter-1}).pdf', f'({counter}).pdf')
-                                else:
-                                    file_name = file_name.replace('.pdf', f'({counter}).pdf')
-
-                                break
 
                         print(f'Filename: {file_name}\n')
                         pdf_filenames.append(file_name)
