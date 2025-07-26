@@ -43,10 +43,9 @@ class HomePageView(TemplateView):
             errors = []
             all_data = []
             zip_buffer = io.BytesIO()
+            pdf_filenames = []  # This will hold the file names for all properties
 
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                pdf_filenames = []
-
                 for url in urls:
                     url = url.strip()
                     if not url:
@@ -86,7 +85,7 @@ class HomePageView(TemplateView):
                                     file_name = file_name.replace('.pdf', f'({counter}).pdf')
                                 break
 
-                            pdf_filenames.append(file_name)
+                        pdf_filenames.append(file_name)
 
                         # Write PDF file to the zip
                         zipf.writestr(file_name, pdf_content)

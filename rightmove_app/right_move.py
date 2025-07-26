@@ -298,12 +298,12 @@ def main(url):
         print('Requested URL:', url)
         response = requests.get(url, headers=headers)
 
-        if response.status_code == 410:
-            error = f'URL {url} returned 410 status code \n\n'
-            print(error)
-            return '', [], '', error
+        # if response.status_code == 410:
+        #     error = f'URL {url} returned 410 status code \n\n'
+        #     print(error)
+        #     return '', [], '', error
 
-        if response.status_code != 200:
+        if response.status_code != 200 or response.status_code != 410:  # Allowing 410 as it returns Data
             error = f'Error {response.status_code} occurred while fetching URL: {url} \n\n'
             print(error)
             return '', [], '', error
