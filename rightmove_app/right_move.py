@@ -62,12 +62,18 @@ def get_page_json(page_response):
 # Function to get images from the response
 
 def get_images(selector):
-    property_json = get_page_json(selector)
+    # property_json = get_page_json(selector)
 
-    images = property_json.get('images', [{}]) or [{}]
-    floor_plans = property_json.get('floorplans', [{}]) or {}
+    try:
+        property_json = json.loads(json.loads(selector.css('script:contains("const adInfo") ::text').re_first('const adInfo =(.*).propertyData.dfpAdInfo.targeting'))['data'])
+    except:
+        property_json = []
 
-    property_images = [image.get('url') for image in images] if images and isinstance(images, list) else []
+    # images = property_json.get('images', [{}]) or [{}]
+    floor_plans = property_json.get('floorplans', {}) or {} if isinstance(property_json, dict) else {}
+
+    # property_images = [image.get('url') for image in images if image.get('url')] if images and isinstance(images, list) else []
+    property_images = [k for k in property_json if '/property-photo/' in str(k) and '/dir/' not in str(k)]
 
     try:
         if isinstance(floor_plans, list):
@@ -79,16 +85,13 @@ def get_images(selector):
     except:
         floor_plan_image = ''
 
-    floor_plan = floor_plan_image or selector.css('a[href*="plan"] img::attr(src)').get('').replace('_max_296x197',
-                                                                                                    '')
-    image_urls = property_images or selector.css(
-        'a[itemprop="photo"] [itemprop="contentUrl"]::attr(content)').getall()
+    floor_plan = floor_plan_image or selector.css('a[href*="plan"] img::attr(src)').get('').replace('_max_296x197', '')
+    image_urls = property_images or selector.css('a[itemprop="photo"] [itemprop="contentUrl"]::attr(content)').getall()
 
     image_items = {f'Image {index}': '' for index in range(1, 11)}
 
     # return {f'Image {index + 1}': image_url for index, image_url in enumerate(image_urls)}
-    image_items.update(
-        {f'Image {index + 1}': f'=IMAGE("{image_url}")' for index, image_url in enumerate(image_urls)})
+    image_items.update({f'Image {index + 1}': f'=IMAGE("{image_url}")' for index, image_url in enumerate(image_urls)})
     image_items.update({'Floor Plan': f'=IMAGE("{floor_plan}")'})
 
     return image_items, image_urls, floor_plan
@@ -137,6 +140,7 @@ def pdf_page_header(canvas, doc):
 
         # Correct path to the logo image
         logo_path = os.path.join('rightmove_app', 'assets', 'input', 'logo.PNG')
+        # logo_path = os.path.join('assets', 'input', 'logo.PNG')  # For Local
 
         canvas.drawImage(logo_path, logo_x, logo_y, width=logo_width, height=logo_height)
     except OSError:
@@ -199,8 +203,8 @@ def make_pdf(item, response):
     """This method make the pdf file of given content.
      it gets some content from item and other value like letting and key features getting from response """
 
-    bed_room = item.get('Bedrooms').replace('×', '')
-    bath_room = item.get('Bathrooms').replace('×', '')
+    bed_room = str(item.get('Bedrooms')).replace('×', '')
+    bath_room = str(item.get('Bathrooms')).replace('×', '')
     price = item.get('Price PW', '')
     price_bed_bath_values = f'<font bgcolor="{HexColor("#A6F79B ")}">{price} </font> | {bed_room} Bedroom | {bath_room} Bathroom'
     address = item.get('Address', '')
@@ -308,7 +312,7 @@ def main(url):
             print(error)
             return '', [], '', error
 
-        selector = Selector(response)
+        selector = Selector(text=response.text)
         json_data = get_page_json(selector)
 
         images, images_urls, floor_plan = get_images(selector)
@@ -320,8 +324,8 @@ def main(url):
                                                                                                             '').strip()
         item['Price PW'] = selector.css('article div:contains("pw")::text').get(default='').replace('pw', '').strip()
         item['Property Type'] = get_value_by_heading(selector, 'PROPERTY TYPE') or json_data.get('propertySubType', '')
-        item['Bedrooms'] = get_value_by_heading(selector, 'BEDROOMS') or str(json_data.get('bedrooms', '')) or 0
-        item['Bathrooms'] = get_value_by_heading(selector, 'BATHROOMS') or str(json_data.get('bathrooms', '')) or 0
+        item['Bedrooms'] = get_value_by_heading(selector, 'BEDROOMS') or str(json_data.get('bedrooms', '')) or '0'
+        item['Bathrooms'] = get_value_by_heading(selector, 'BATHROOMS') or str(json_data.get('bathrooms', '')) or '0'
         item['Available Date'] = get_value_by_heading(selector, 'Let available date:', letting_details=True)
         item['Furnish Type'] = get_value_by_heading(selector, 'Furnish type:', letting_details=True)
         item['image_urls'] = images_urls
@@ -347,9 +351,23 @@ def main(url):
 
         data.append(item)
 
+        # # TODO: Save PDF file locally for testing
+        # pdf_dir = "pdf_files"
+        # os.makedirs(pdf_dir, exist_ok=True)
+        # with open(f"{pdf_dir}/{file_name}.pdf", "wb") as f:
+        #     f.write(pdf)
+
         print(f'PDf File : {file_name} created against : {url}')
         return pdf, data, file_name, error
     except Exception as e:
         error = f"Error processing URL {url}: {e} \n\n"
         print('Error :', error)
         return '', [], '', error
+
+
+# if __name__ == '__main__':
+#     # Get property links from https://www.rightmove.co.uk/property-to-rent/find.html?searchLocation=Leeds+Station&useLocationIdentifier=true&locationIdentifier=STATION%5E5462&radius=0.0&_includeLetAgreed=on
+# 
+#     # url = "https://www.rightmove.co.uk/properties/174061916#/?channel=RES_LET"
+#     url = "https://www.rightmove.co.uk/properties/88253157#/?channel=RES_LET"
+#     main(url)
