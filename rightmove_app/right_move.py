@@ -251,8 +251,9 @@ def make_pdf(item, response):
     # previous
     # property_id = ''.join(response.url.split('/')[-1:])
 
-    property_id = re.search(r'/properties/(\d+)', response.response.url)
-    property_id = property_id.group(1) if property_id else ''
+    # property_id = re.search(r'/properties/(\d+)', response.response.url)
+    # property_id = property_id.group(1) if property_id else ''
+    property_id = item.get('property_id')
     property_id_custom_style_content = ParagraphStyle(
         'CustomStyleContent', parent=styles['Normal'], fontSize=10, textColor='black',
         spaceBefore=10, alignment=2, leading=10, rightIndent=40
@@ -317,7 +318,11 @@ def main(url):
 
         images, images_urls, floor_plan = get_images(selector)
 
+        property_id = re.search(r'/properties/(\d+)', url)
+        property_id = property_id.group(1) if property_id else ''
+
         item = OrderedDict()
+        item['property_id'] = property_id
         address = selector.css('[itemprop="streetAddress"]::text').get(default='').strip()
         item['Address'] = address
         item['Price PCM'] = selector.css('article div span:contains(" pcm")::text').get(default='').replace('pcm',
@@ -351,11 +356,11 @@ def main(url):
 
         data.append(item)
 
-        # # TODO: Save PDF file locally for testing
-        # pdf_dir = "pdf_files"
-        # os.makedirs(pdf_dir, exist_ok=True)
-        # with open(f"{pdf_dir}/{file_name}.pdf", "wb") as f:
-        #     f.write(pdf)
+        # TODO: Save PDF file locally for testing
+        pdf_dir = "pdf_files"
+        os.makedirs(pdf_dir, exist_ok=True)
+        with open(f"{pdf_dir}/{file_name}.pdf", "wb") as f:
+            f.write(pdf)
 
         print(f'PDf File : {file_name} created against : {url}')
         return pdf, data, file_name, error
