@@ -344,6 +344,7 @@ def main(url):
         # Remove 'image_urls' and 'Floor Plan image url' from item
         del item['image_urls']
         del item['Floor Plan image url']
+        del item['property_id']
 
         # Remove keys added by images update
         for key in images.keys():
@@ -356,11 +357,11 @@ def main(url):
 
         data.append(item)
 
-        # TODO: Save PDF file locally for testing
-        pdf_dir = "pdf_files"
-        os.makedirs(pdf_dir, exist_ok=True)
-        with open(f"{pdf_dir}/{file_name}.pdf", "wb") as f:
-            f.write(pdf)
+        # # TODO: Save PDF file locally for testing
+        # pdf_dir = "pdf_files"
+        # os.makedirs(pdf_dir, exist_ok=True)
+        # with open(f"{pdf_dir}/{file_name}.pdf", "wb") as f:
+        #     f.write(pdf)
 
         print(f'PDf File : {file_name} created against : {url}')
         return pdf, data, file_name, error
@@ -372,7 +373,7 @@ def main(url):
 
 # if __name__ == '__main__':
 #     # Get property links from https://www.rightmove.co.uk/property-to-rent/find.html?searchLocation=Leeds+Station&useLocationIdentifier=true&locationIdentifier=STATION%5E5462&radius=0.0&_includeLetAgreed=on
-# 
+#
 #     # url = "https://www.rightmove.co.uk/properties/174061916#/?channel=RES_LET"
 #     url = "https://www.rightmove.co.uk/properties/88253157#/?channel=RES_LET"
 #     main(url)
