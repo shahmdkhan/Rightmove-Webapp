@@ -60,14 +60,21 @@ def get_page_json(page_response):
 
 
 # Function to get images from the response
-
 def get_images(selector):
     # property_json = get_page_json(selector)
 
     try:
-        property_json = json.loads(json.loads(selector.css('script:contains("const adInfo") ::text').re_first('const adInfo =(.*).propertyData.dfpAdInfo.targeting'))['data'])
+        property_json1 = json.loads(json.loads(selector.css('script:contains("const adInfo") ::text').re_first('const adInfo =(.*).propertyData.dfpAdInfo.targeting'))['data'])
     except:
-        property_json = []
+        property_json1 = []
+
+    try:
+        property_json2 = json.loads(json.loads(selector.css('script:contains("propertyData") ::text').re_first(' =(.*);'))['data'])
+    except:
+        property_json2 = []
+
+
+    property_json = property_json1 or property_json2
 
     # images = property_json.get('images', [{}]) or [{}]
     floor_plans = property_json.get('floorplans', {}) or {} if isinstance(property_json, dict) else {}
