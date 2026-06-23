@@ -60,6 +60,7 @@ def get_page_json(page_response):
 
 
 # Function to get images from the response
+
 def get_images(selector):
     # property_json = get_page_json(selector)
 
@@ -216,13 +217,14 @@ def make_pdf(item, response):
     price_bed_bath_values = f'<font bgcolor="{HexColor("#A6F79B ")}">{price} </font> | {bed_room} Bedroom | {bath_room} Bathroom'
     address = item.get('Address', '')
 
-    letting_details_headers = response.css('._2RnXSVJcWbWv4IpBC1Sng6 dt::text').getall()
-    letting_details_value = response.css('._2RnXSVJcWbWv4IpBC1Sng6 dd::text').getall()
+    letting_details_headers = response.css('._2RnXSVJcWbWv4IpBC1Sng6 dt::text').getall() or response.css('h2:contains("Letting details") + dl dt ::text').getall()
+    letting_details_value = response.css('._2RnXSVJcWbWv4IpBC1Sng6 dd::text').getall() or [' '.join(dd.css('::text').getall()).split('A deposit provides sec')[0].strip() for dd in response.css('h2:contains("Letting details") + dl dd')]
 
     letting_details = [f"{label}{value}" for label, value in zip(letting_details_headers, letting_details_value)]
     letting_details = get_bullet_points(letting_details).replace('\n', '<br/>')
 
-    key_features = get_bullet_points(response.css('.lIhZ24u1NHMa5Y6gDH90A ::text').getall()).replace('\n', '<br/>')
+    # key_features = get_bullet_points(response.css('.lIhZ24u1NHMa5Y6gDH90A ::text').getall()).replace('\n', '<br/>')
+    key_features = get_bullet_points(response.css('[data-testid="keyFeatures"] li ::text').getall()).replace('\n', '<br/>')
 
     # Create a BytesIO object to hold the PDF content
     pdf_buffer = BytesIO()
@@ -382,5 +384,10 @@ def main(url):
 #     # Get property links from https://www.rightmove.co.uk/property-to-rent/find.html?searchLocation=Leeds+Station&useLocationIdentifier=true&locationIdentifier=STATION%5E5462&radius=0.0&_includeLetAgreed=on
 #
 #     # url = "https://www.rightmove.co.uk/properties/174061916#/?channel=RES_LET"
-#     url = "https://www.rightmove.co.uk/properties/88253157#/?channel=RES_LET"
-#     main(url)
+#     url = "https://www.rightmove.co.uk/properties/88191228#/?channel=RES_LET"
+
+    # url = 'https://www.rightmove.co.uk/properties/88060587#/?channel=RES_LET'
+    # url =  'https://www.rightmove.co.uk/properties/174526394#/?channel=RES_LET'
+    # url = 'https://www.rightmove.co.uk/properties/88313586#/?channel=RES_LET'
+    # url = 'https://www.rightmove.co.uk/properties/89634072#/?channel=RES_LET'
+    # main(url)
